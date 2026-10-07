@@ -1,5 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap');
 
+.note-status{display:inline-block;width:fit-content;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;line-height:1.5;margin:6px 0}
+.note-status-pending{background:#f1e9f7;color:#72528f}
+.note-status-in_progress{background:#fff0d8;color:#8d6020}
+.note-status-completed{background:#e4f2e9;color:#376b4c}
+.note-form select{width:100%;padding:10px 12px;font:inherit;margin-bottom:16px}
+
 :root{font-family:'Gowun Dodum','Malgun Gothic',sans-serif;color:#484054;background:#f2edfc;--green:#72528f;--dark:#efe5f8;--muted:#75677f;--line:#e8ddef}
 body{background:linear-gradient(135deg,#faedf3,#f2edfc 55%,#eaf5ef);min-height:100vh}
 h1,h2,h3,.brand{font-family:'Jua','Malgun Gothic',sans-serif;font-weight:400;color:#604777}

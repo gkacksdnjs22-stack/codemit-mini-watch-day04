@@ -12,9 +12,15 @@
     "새로고침 후 세션과 DB 메모 유지",
     "요청 경로/상태 필터와 조회 목록 기준 건수",
     "로그아웃 후 공통 로그인, 보호 API 접근 거절",
-    "검증 계정과 검증 메모 정리, 기존 자료 보존"
+    "검증 계정과 검증 메모 정리, 기존 자료 보존",
+    "처리 상태 선택 작성·확인 중→완료 저장·새로고침 후 유지·변경 취소 후 완료 보존"
   ],
-  "proof_images": ["dashboard.png", "login-auto-routing.png", "board-logout.png"],
+  "proof_images": [
+    "dashboard.png",
+    "login-auto-routing.png",
+    "board-logout.png",
+    "note-status.png"
+  ],
   "temporary_test_data_cleaned": true,
   "existing_notes_preserved": true
 }

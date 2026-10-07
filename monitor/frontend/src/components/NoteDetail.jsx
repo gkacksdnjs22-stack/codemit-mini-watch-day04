@@ -1,4 +1,5 @@
 import Icon from "./Icon.jsx";
+import NoteStatus from "./NoteStatus.jsx";
 
 export default function NoteDetail({
   note,
@@ -46,6 +47,7 @@ export default function NoteDetail({
         </div>
       </div>
       <h3>{note.title}</h3>
+      <NoteStatus status={note.status} />
       <p className="detail-date">
         마지막 수정 {new Date(note.updated_at).toLocaleString("ko-KR")}
       </p>

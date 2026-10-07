@@ -28,6 +28,8 @@ def main():
                 continue
             if path.name.startswith("try_"):
                 continue
+            if path.name in {"submission-record.json", "submission-result.png"}:
+                continue
             archive.write(path, "mini-watch-day04/" + relative.as_posix())
         names = archive.namelist()
         assert any(name.endswith("package-lock.json") for name in names)

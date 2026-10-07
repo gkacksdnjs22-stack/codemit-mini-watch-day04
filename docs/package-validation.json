@@ -1,4 +1,5 @@
 {
+  "repeat_schema_setup": "PASS",
   "fresh_npm_install_and_react_build": "PASS",
   "fresh_databases_and_integration": "PASS",
   "cli_account_and_react_login_assets": "PASS",

@@ -34,9 +34,10 @@ def create():
 
 @notes_bp.put("/<int:note_id>")
 def update(note_id):
-    if find_note(note_id) is None:
+    existing = find_note(note_id)
+    if existing is None:
         return {"error": "메모를 찾을 수 없습니다."}, 404
-    values, error = validate_note(request.get_json(silent=True))
+    values, error = validate_note(request.get_json(silent=True), default_status=existing["status"])
     if error:
         return {"error": error}, 400
     note = update_note(note_id, **values)

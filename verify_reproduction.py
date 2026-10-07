@@ -68,6 +68,8 @@ def main():
                 conn.execute((project / "general/sql/setup.sql").read_text(encoding="utf-8"))
             password = uuid.uuid4().hex
             run([sys.executable, "monitor/backend/setup_db.py", "--username", "qa_operator", "--name", "검증 운영자", "--password-stdin"], project, password + "\n" + password + "\n")
+            run([sys.executable, "monitor/backend/setup_db.py"], project)
+            report["repeat_schema_setup"] = "PASS"
             frontend = project / "monitor/frontend"
             run(["npm.cmd", "ci"], frontend)
             run(["npm.cmd", "run", "build"], frontend)

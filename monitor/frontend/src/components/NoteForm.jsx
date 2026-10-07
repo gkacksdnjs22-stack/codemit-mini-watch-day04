@@ -1,14 +1,16 @@
 import { useState } from "react";
+import { NOTE_STATUSES } from "../note-status.js";
 
 export default function NoteForm({ note, onSave, onCancel, pending }) {
   const [title, setTitle] = useState(note?.title || "");
   const [body, setBody] = useState(note?.body || "");
+  const [status, setStatus] = useState(note?.status || "pending");
   return (
     <form
       className="note-form"
       onSubmit={(event) => {
         event.preventDefault();
-        onSave({ title, body });
+        onSave({ title, body, status });
       }}
       noValidate
     >
@@ -37,6 +39,10 @@ export default function NoteForm({ note, onSave, onCancel, pending }) {
         rows={7}
       />
       <p className="form-hint">제목 200자 · 내용 10,000자 이내</p>
+      <label htmlFor="note-status">처리 상태</label>
+      <select id="note-status" value={status} onChange={(event) => setStatus(event.target.value)} disabled={pending}>
+        {NOTE_STATUSES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+      </select>
       <div className="form-actions">
         <button
           className="secondary"

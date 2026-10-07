@@ -20,3 +20,11 @@ CREATE TABLE IF NOT EXISTS notes (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- 기존 메모는 내용과 시각을 보존하고 '확인 전' 상태로 시작합니다.
+ALTER TABLE notes ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'pending';
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid = 'notes'::regclass AND conname = 'notes_status_valid') THEN
+        ALTER TABLE notes ADD CONSTRAINT notes_status_valid CHECK (status IN ('pending', 'in_progress', 'completed'));
+    END IF;
+END $$;

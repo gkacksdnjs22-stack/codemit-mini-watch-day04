@@ -48,7 +48,8 @@ def main():
         client.environ_base["HTTP_X_CSRF_TOKEN"] = good.json["csrf_token"]
         record("DB 계정과 해시 판정: 정상200 / 빈 값400 / 틀린 계정401")
 
-        for bad in ({}, [], {"title": "  ", "body": "본문"}, {"title": "제목", "body": "\n\t"}, {"title": 1, "body": "본문"}):
+        for bad in ({}, [], {"title": "  ", "body": "본문"}, {"title": "제목", "body": "\n\t"}, {"title": 1, "body": "본문"},
+                    *({"title": "제목", "body": "본문", "status": status} for status in ("unknown", "", None, 1, ["pending"]))):
             assert client.post("/api/notes", json=bad).status_code == 400
         with connect_db() as conn:
             assert conn.execute("SELECT * FROM notes ORDER BY id").fetchall() == before
@@ -61,6 +62,7 @@ def main():
         ids.append(note["id"])
         url = "/api/notes/" + str(note["id"])
         assert note["title"] == title and note["body"] == body
+        assert note["status"] == "pending"
         assert any(n["id"] == note["id"] for n in client.get("/api/notes").json["notes"])
         assert client.get(url).json["note"] == note
         record("작성201 / 공백 제거 / SQL 특수문자 보존 / 목록·상세 조회")
@@ -69,10 +71,30 @@ def main():
             assert client.put(url, json=bad).status_code == 400
             assert client.get(url).json["note"] == note
         record("공백 수정400 / 원래 제목·내용·수정시각 보존")
-        updated = client.put(url, json={"title": "수정 " + token, "body": " 수정 내용 "})
+        processing = client.put(url, json={"title": title, "body": body, "status": "in_progress"})
+        assert processing.status_code == 200 and processing.json["note"]["status"] == "in_progress"
+        for invalid in ("unknown", None, 1, ["completed"]):
+            assert client.put(url, json={"title": title, "body": body, "status": invalid}).status_code == 400
+            assert client.get(url).json["note"] == processing.json["note"]
+        try:
+            with connect_db() as conn:
+                conn.execute("UPDATE notes SET status=%s WHERE id=%s", ("unknown", note["id"]))
+        except psycopg.errors.CheckViolation:
+            pass
+        else:
+            raise AssertionError("DB에서 잘못된 처리 상태를 허용했습니다.")
+        updated = client.put(url, json={"title": "수정 " + token, "body": " 수정 내용 ", "status": "completed"})
         assert updated.status_code == 200 and updated.json["note"]["body"] == "수정 내용"
+        assert updated.json["note"]["status"] == "completed"
+        assert next(n for n in client.get("/api/notes").json["notes"] if n["id"] == note["id"])["status"] == "completed"
+        assert client.put(url, json={"title": "수정 " + token, "body": "수정 내용"}).json["note"]["status"] == "completed"
+        explicit = client.post("/api/notes", json={"title": "상태 지정 " + token, "body": body, "status": "in_progress"})
+        assert explicit.status_code == 201 and explicit.json["note"]["status"] == "in_progress"
+        ids.append(explicit.json["note"]["id"])
+        assert client.delete("/api/notes/" + str(ids[-1])).status_code == 200
+        record("처리 상태 기본값·지정 작성·확인 중→완료 / 목록·상세 일치 / 잘못된 상태400와 DB 제약 / 상태 생략 시 보존")
         child = subprocess.run(
-            [sys.executable, "-c", "from app import create_app; import sys; c=create_app().test_client(); s=c.session_transaction(); session=s.__enter__(); session.update(user_id=int(sys.argv[2]),role='operator'); s.__exit__(None,None,None); r=c.get('/api/notes/'+sys.argv[1]); assert r.status_code==200 and r.json['note']['body']=='수정 내용'; print('PERSISTED')", str(note["id"]), str(user_id)],
+            [sys.executable, "-c", "from app import create_app; import sys; c=create_app().test_client(); s=c.session_transaction(); session=s.__enter__(); session.update(user_id=int(sys.argv[2]),role='operator'); s.__exit__(None,None,None); r=c.get('/api/notes/'+sys.argv[1]); assert r.status_code==200 and r.json['note']['body']=='수정 내용' and r.json['note']['status']=='completed'; print('PERSISTED')", str(note["id"]), str(user_id)],
             cwd=BACKEND, capture_output=True, text=True,
         )
         assert child.returncode == 0 and "PERSISTED" in child.stdout, child.stderr

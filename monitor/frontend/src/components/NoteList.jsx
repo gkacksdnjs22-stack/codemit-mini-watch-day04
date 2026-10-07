@@ -1,3 +1,5 @@
+import NoteStatus from "./NoteStatus.jsx";
+
 export default function NoteList({
   notes,
   selectedId,
@@ -32,6 +34,7 @@ export default function NoteList({
             NOTE {String(note.id).padStart(3, "0")}
           </span>
           <strong>{note.title}</strong>
+          <NoteStatus status={note.status} />
           <span className="note-date">
             {new Date(note.updated_at).toLocaleDateString("ko-KR")}
           </span>

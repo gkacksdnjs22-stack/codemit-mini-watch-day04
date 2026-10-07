@@ -10,7 +10,7 @@ def serialize(row):
 
 def list_notes():
     with connect_db() as conn:
-        rows = conn.execute("SELECT id, title, created_at, updated_at FROM notes ORDER BY id DESC").fetchall()
+        rows = conn.execute("SELECT id, title, status, created_at, updated_at FROM notes ORDER BY id DESC").fetchall()
     return [serialize(row) for row in rows]
 
 
@@ -20,19 +20,19 @@ def find_note(note_id):
     return serialize(row)
 
 
-def create_note(title, body):
+def create_note(title, body, status="pending"):
     with connect_db() as conn:
         row = conn.execute(
-            "INSERT INTO notes (title, body) VALUES (%s, %s) RETURNING *", (title, body)
+            "INSERT INTO notes (title, body, status) VALUES (%s, %s, %s) RETURNING *", (title, body, status)
         ).fetchone()
     return serialize(row)
 
 
-def update_note(note_id, title, body):
+def update_note(note_id, title, body, status="pending"):
     with connect_db() as conn:
         row = conn.execute(
-            "UPDATE notes SET title = %s, body = %s, updated_at = NOW() WHERE id = %s RETURNING *",
-            (title, body, note_id),
+            "UPDATE notes SET title = %s, body = %s, status = %s, updated_at = NOW() WHERE id = %s RETURNING *",
+            (title, body, status, note_id),
         ).fetchone()
     return serialize(row)
 
