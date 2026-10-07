@@ -39,4 +39,3 @@ def get_post(post_id):
     if post is None:
         return {"error": "게시글을 찾을 수 없습니다."}, 404
     return post
-

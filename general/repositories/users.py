@@ -20,4 +20,3 @@ def create_user(username, display_name, password_hash):
             "INSERT INTO users (username, display_name, password_hash) VALUES (%s, %s, %s) RETURNING id",
             (username, display_name, password_hash),
         ).fetchone()
-

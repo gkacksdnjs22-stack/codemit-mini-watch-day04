@@ -26,6 +26,8 @@ def main():
                 continue
             if path.suffix in {".pyc", ".zip", ".log"}:
                 continue
+            if path.name.startswith("try_"):
+                continue
             archive.write(path, "mini-watch-day04/" + relative.as_posix())
         names = archive.namelist()
         assert any(name.endswith("package-lock.json") for name in names)
